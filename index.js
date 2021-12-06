@@ -2,10 +2,9 @@ import express from "express";
 import multer from "multer";
 // import sizeOf from "image-size";
 import sharp from "sharp";
-/** import fs from "fs";
+// import fs from "fs";
 import axios from "axios";
-import crypto from "crypto";
-*/
+// import crypto from "crypto";
 
 const app = express();
 
@@ -23,6 +22,24 @@ app
       .toFile("./img/result.png", (err, info) => {
         r.res.download("./img/result.png");
       });
+  })
+
+  .get("/wordpress/", async (req, res, next) => {
+    const content = req.query.content;
+    const response = await axios.post(
+      "https://wordpress.kodaktor.ru/wp-json/jwt-auth/v1/token",
+      { username: "gossjsstudent2017", password: "|||123|||456" }
+    );
+    const token = response.data.token;
+    const WPresponse = await axios.post(
+      `https://wordpress.kodaktor.ru/wp-json/wp/v2/posts/`,
+
+      { title: "chiziwe", content, status: "publish" },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    res.send(WPresponse.data.id + "");
   })
 
   .all("/login", (r) => r.res.send("chiziwe"))
