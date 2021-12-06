@@ -1,10 +1,9 @@
 import express from "express";
 import multer from "multer";
-// import sizeOf from "image-size";
+import sizeOf from "image-size";
 import sharp from "sharp";
 // import fs from "fs";
 import axios from "axios";
-// import crypto from "crypto";
 
 const app = express();
 
@@ -40,6 +39,13 @@ app
       }
     );
     res.send(WPresponse.data.id + "");
+  })
+
+  .post("/size2json", img.single("image"), async (req, res) => {
+    const tempPath = req.file.path;
+    sizeOf(tempPath, function (err, dimensions) {
+        res.send({width: dimensions.width, height: dimensions.height});
+    });
   })
 
   .all("/login", (r) => r.res.send("chiziwe"))
