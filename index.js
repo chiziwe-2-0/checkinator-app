@@ -10,20 +10,26 @@ const img = multer({dest: "./img"});
 
 app
 
-  .get("/makeimage", (req, res) => {
-    const width = parseInt(req.query.width);
-    const height = parseInt(req.query.height);
-    const path = "./img/result.png";
-    sharp("./img/img1.jpeg")
+  .all("/makeimage", async (req, res) => {
+    const width = Number(req.query.width);
+    const height = Number(req.query.height);
+
+    const path = "./img/img1.png";
+    const pathRes = "./img/result.png";
+
+    sharp(path)
       .resize(width, height)
-      .toFile(path, () => {res.download(path)});
+      .toFile(pathRes, () => {res.download(pathRes)});
   })
 
-  .get("/wordpress/", async (req, res) => {
+  .all("/wordpress/", async (req, res) => {
     const content = req.query.content;
+    const URL1 = 'https://wordpress.kodaktor.ru/wp-json/jwt-auth/v1/token';
+    const URL2 = 'https://wordpress.kodaktor.ru/wp-json/wp/v2/posts/';
+
     const response = await axios
         .post(
-            "https://wordpress.kodaktor.ru/wp-json/jwt-auth/v1/token",
+            URL1,
             {
                 username: "gossjsstudent2017",
                 password: "|||123|||456"
@@ -32,7 +38,7 @@ app
     const token = response.data.token;
     const wp_response = await axios
         .post
-            (`https://wordpress.kodaktor.ru/wp-json/wp/v2/posts/`,
+            (URL2,
             {
                 title: "chiziwe",
                 content,
