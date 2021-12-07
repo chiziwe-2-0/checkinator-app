@@ -44,7 +44,7 @@ app
     res.send(wp_response.data.id);
   })
 
-  .post("/size2json", img.single("image"), (req, res) => {
+  .post("/size2json", img.single("image"), async (req, res) => {
     const path = req.file.path;
     sizeOf(path, function (err, dimensions) {
         res.send(
