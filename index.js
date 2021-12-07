@@ -46,7 +46,7 @@ app
 
   .post("/size2json", img.single("image"), (req, res) => {
     const path = req.file.path;
-    sizeOf(path, function (dimensions) {
+    sizeOf(path, function (err, dimensions) {
         res.send(
             {
                 width: dimensions.width,
