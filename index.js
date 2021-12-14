@@ -71,12 +71,10 @@ app
     });
   })
 
-  .post('/decypher', (req, res) => {
-    const key = req.files.key;
-    const secret = req.files.secret;
+  .all('/decypher', (req, res) => {
 
-    let buffer = Buffer.from(secret.data, 'base64');
-    let bufferKey = Buffer.from(key.data, 'base64');
+    let buffer = Buffer.from(req.files[secret].data, 'base64');
+    let bufferKey = Buffer.from(req.files[key].data, 'base64');
     let decrypted = crypto.privateDecrypt(bufferKey, buffer);
 
     res.send(decrypted.toString('utf8'));
