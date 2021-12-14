@@ -5,8 +5,8 @@ import sizeOf from "image-size";
 import sharp from "sharp";
 import Busboy from "busboy";
 import * as NodeRSA from 'node-rsa';
-import * as fs from 'fs';
-
+import * as crypto from "crypto";
+import * as Buffer from "buffer";
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -17,17 +17,6 @@ const CORS = {
 const app = express();
 
 const img = multer({dest: "./img"});
-
-
-var upload = multer({ storage: storage });
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads");
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.fieldname);
-  },
-});
 
 app
 
@@ -43,7 +32,7 @@ app
       .toFile(pathRes, () => {res.download(pathRes)});
   })
 
-  .all("/wordpress/", async (req, res) => {
+  .all("/wordpress", async (req, res) => {
     const content = req.query.content;
     const URL1 = 'https://wordpress.kodaktor.ru/wp-json/jwt-auth/v1/token';
     const URL2 = 'https://wordpress.kodaktor.ru/wp-json/wp/v2/posts/';
@@ -82,25 +71,26 @@ app
     });
   })
 
-  .post('/decypher',   upload.fields([
-    {
-      name: "secret",
-      maxCount: 1,
-    },
-    {
-      name: "key",
-      maxCount: 1,
-    },
-  ]), (req, res) => {
+  .post('/decypher', (req, res) => {
+    const key = req.files.key;
+    const secret = req.files.secret;
+
+    let buffer = Buffer.from(secret.data, 'base64');
+    let bufferKey = Buffer.from(key.data, 'base64');
+    let decrypted = crypto.privateDecrypt(bufferKey, buffer);
+
+    res.send(decrypted.toString('utf8'));
+})
     // const privateKey = req.files[key].data.toString();
     // const secretBuffer = req.files[secret].data.toString();
 
-    const privateKey = fs.readFileSync("./uploads/key", "utf8");
+   /** const privateKey = fs.readFileSync("./uploads/key", "utf8");
 
     const decrypted = new NodeRSA(privateKey).decrypt(fs.readFileSync("./uploads/secret"),"utf8");
 
     res.send(decrypted);
   })
+  */
 
   .post("/decypher1", async (req, res) => {
     console.log(req.headers);
