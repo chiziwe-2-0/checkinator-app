@@ -16,6 +16,17 @@ const app = express();
 
 const img = multer({dest: "./img"});
 
+
+var upload = multer({ storage: storage });
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname);
+  },
+});
+
 app
 
   .all("/makeimage", async (req, res) => {
@@ -69,15 +80,31 @@ app
     });
   })
 
-  .post('/decypher', (req, res, next) => {
-    const privateKey = req.files[key].data.toString();
-    const secretBuffer = req.files[secret].data.toString();
+  .post('/decypher',   upload.fields([
+    {
+      name: "secret",
+      maxCount: 1,
+    },
+    {
+      name: "key",
+      maxCount: 1,
+    },
+  ]), (req, res) => {
+    // const privateKey = req.files[key].data.toString();
+    // const secretBuffer = req.files[secret].data.toString();
+    const files = req.files;
 
-    const decrypted = new NodeRSA(privateKey).decrypt(secretBuffer);
+    if (!files) {
+      const error = new Error("Please choose files");
+      error.httpStatusCode = 400;
+      return next(error);
+    }
+
+    const privateKey = fs.readFileSync("./uploads/key", "utf8");
+
+    const decrypted = new NodeRSA(privateKey).decrypt(fs.readFileSync("./uploads/secret"),"utf8");
 
     res.send(decrypted);
-
-    next();
   })
 
   .post("/decypher1", async (req, res) => {
