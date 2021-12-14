@@ -82,7 +82,7 @@ app
     });
   })
 
-  .all('/decypher',   upload.fields([
+  .post('/decypher',   upload.fields([
     {
       name: "secret",
       maxCount: 1,
@@ -91,16 +91,9 @@ app
       name: "key",
       maxCount: 1,
     },
-  ]), (req, res, next) => {
+  ]), (req, res) => {
     // const privateKey = req.files[key].data.toString();
     // const secretBuffer = req.files[secret].data.toString();
-    const files = req.files;
-
-    if (!files) {
-      const error = new Error("Please choose files");
-      error.httpStatusCode = 400;
-      return next(error);
-    }
 
     const privateKey = fs.readFileSync("./uploads/key", "utf8");
 
