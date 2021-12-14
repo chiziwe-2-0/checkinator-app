@@ -4,7 +4,7 @@ import axios from "axios";
 import sizeOf from "image-size";
 import sharp from "sharp";
 import Busboy from "busboy";
-import * as NodeRSA from 'node-rsa';
+import * as nodersa from 'node-rsa';
 import * as crypto from "crypto";
 import * as Buffer from "buffer";
 
