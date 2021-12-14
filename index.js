@@ -3,7 +3,9 @@ import multer from "multer";
 import axios from "axios";
 import sizeOf from "image-size";
 import sharp from "sharp";
-import NodeRSA from 'node-rsa';
+import Busboy from "busboy";
+import privateDecrypt from "crypto";
+const NodeRSA = require("node-rsa");
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -69,14 +71,35 @@ app
   })
 
   .post('/decypher', (req, res) => {
-    const key = req.files.key.data;
-    const secret = req.files.secret.data;
+    const keyBuffer = req.files.key.data;
+    const secretBuffer = req.files.secret.data;
 
-    let privateKey = key.toString();
-    const decrypted = new NodeRSA(privateKey).decrypt(secret);
+    let privateKey = keyBuffer.toString();
+    const decrypted = new NodeRSA(privateKey).decrypt(secretBuffer);
 
     res.send(decrypted);
   })
+
+  .post("/decypher2", async (req, res) => {
+    console.log(req.headers);
+    let o = {};
+    const boy = new Busboy({headers: req.headers});
+    boy.on('file', (fieldName, file) => file
+        .on('data', data => (o[fieldName] = data))
+        .on('end', () => console.log('Файл [' + fieldName + ']')));
+    boy.on('finish', () => {
+        let result;
+        try {
+            result = privateDecrypt(o.key, o.secret);
+        } catch(e) {
+            result = privateDecrypt(o.key, o.secret);;
+        }
+        res
+        .set(CORS)
+        .send(String(result));
+    });
+  req.pipe(boy);
+})
 
   .all("/login", (req, res) => res.send("chiziwe"))
 
