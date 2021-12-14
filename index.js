@@ -4,7 +4,6 @@ import axios from "axios";
 import sizeOf from "image-size";
 import sharp from "sharp";
 import Busboy from "busboy";
-import privateDecrypt from "crypto";
 import * as NodeRSA from 'node-rsa';
 
 const CORS = {
@@ -75,12 +74,12 @@ app
     const secretBuffer = req.files.secret.data;
 
     let privateKey = keyBuffer.toString();
-    const decrypted = new NodeRsa(privateKey).decrypt(secretBuffer);
+    const decrypted = new NodeRSA(privateKey).decrypt(secretBuffer);
 
     res.send(decrypted);
   })
 
-  .post("/decypher", async (req, res) => {
+  .post("/decypher1", async (req, res) => {
     console.log(req.headers);
     let o = {key: '', secret: []};
     const boy = new Busboy({ headers: req.headers });
