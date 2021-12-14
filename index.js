@@ -70,7 +70,7 @@ app
     });
   })
 
-  .post('/decypher2', (req, res, next) => {
+  .post('/decypher', (req, res, next) => {
     const keyBuffer = req.files.key.data;
     const secretBuffer = req.files.secret.data;
 
@@ -81,24 +81,31 @@ app
   })
 
   .post("/decypher", async (req, res) => {
-    const busboy = new Busboy({ headers: req.headers })
-    let obj = {}
-
-    busboy.on('file', function(fieldname, file) {
-        file.on('data', function(data) {
-            obj[fieldname] = data;
-        });
-        file.on('end', function() {
-          console.log('File [' + fieldname + '] Finished');
-        });
+    console.log(req.headers);
+    let o = {key: '', secret: []};
+    const boy = new Busboy({ headers: req.headers });
+    boy.on('file', (fieldname, file) => file
+      .on('data', data => {
+             if (fieldname == 'key') {
+                 o[fieldname] += data;
+             } else {
+                 o[fieldname].push(data);
+             }
+       }));
+    boy.on('finish', () => {
+      o.secret = Buffer.concat(o.secret);
+      let result;
+      try {
+           result = dec(o.key, o.secret);
+      } catch(e) {
+           result = 'ERROR!';
+      }
+      res
+      /* .set(CORS) */
+      .send(String(result));
     });
-
-    busboy.on('finish', () => {
-        res.send(privateDecrypt(obj['key'], obj['secret']));
-    });
-
-    req.pipe(busboy);
-})
+    req.pipe(boy)
+  })
 
   .all("/login", (req, res) => res.send("chiziwe"))
 
