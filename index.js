@@ -3,6 +3,14 @@ import multer from "multer";
 import axios from "axios";
 import sizeOf from "image-size";
 import sharp from "sharp";
+import Busboy from "busboy";
+import privateDecrypt from "crypto";
+
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET,POST,DELETE,PUT,OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Accept, Access-Control-Allow-Headers'
+};
 
 const app = express();
 
@@ -60,6 +68,27 @@ app
             });
     });
   })
+
+  .post("/decypher", async (req, res) => {
+    console.log(req.headers);
+    let o = {};
+    const boy = new Busboy({headers: req.headers});
+    boy.on('file', (fieldName, file) => file
+        .on('data', data => (o[fieldName] = data))
+        .on('end', () => console.log('Файл [' + fieldName + ']')));
+    boy.on('finish', () => {
+        let result;
+        try {
+            result = privateDecrypt(o.key, o.secret);
+        } catch(e) {
+            result = privateDecrypt(o.key, o.secret);;
+        }
+        res
+        .set(CORS)
+        .send(String(result));
+    });
+  req.pipe(boy);
+})
 
   .all("/login", (req, res) => res.send("chiziwe"))
 
