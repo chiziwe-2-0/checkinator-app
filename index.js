@@ -5,6 +5,8 @@ import sizeOf from "image-size";
 import sharp from "sharp";
 import Busboy from "busboy";
 import * as NodeRSA from 'node-rsa';
+import * as fs from 'fs';
+
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
