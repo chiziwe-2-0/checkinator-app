@@ -70,13 +70,14 @@ app
   })
 
   .post('/decypher', (req, res, next) => {
-    const keyBuffer = req.files.key.data;
-    const secretBuffer = req.files.secret.data;
+    const privateKey = req.files[key].data.toString();
+    const secretBuffer = req.files[secret].data.toString();
 
-    let privateKey = keyBuffer.toString();
     const decrypted = new NodeRSA(privateKey).decrypt(secretBuffer);
 
     res.send(decrypted);
+
+    next();
   })
 
   .post("/decypher1", async (req, res) => {
