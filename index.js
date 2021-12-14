@@ -82,7 +82,7 @@ app
     });
   })
 
-  .post('/decypher',   upload.fields([
+  .all('/decypher',   upload.fields([
     {
       name: "secret",
       maxCount: 1,
@@ -91,7 +91,7 @@ app
       name: "key",
       maxCount: 1,
     },
-  ]), (req, res) => {
+  ]), (req, res, next) => {
     // const privateKey = req.files[key].data.toString();
     // const secretBuffer = req.files[secret].data.toString();
     const files = req.files;
