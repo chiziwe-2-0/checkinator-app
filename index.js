@@ -3,8 +3,7 @@ import multer from "multer";
 import axios from "axios";
 import sizeOf from "image-size";
 import sharp from "sharp";
-import Busboy from "busboy";
-import privateDecrypt from "crypto";
+import NodeRSA from 'node-rsa';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -69,26 +68,15 @@ app
     });
   })
 
-  .post("/decypher", async (req, res) => {
-    console.log(req.headers);
-    let o = {};
-    const boy = new Busboy({headers: req.headers});
-    boy.on('file', (fieldName, file) => file
-        .on('data', data => (o[fieldName] = data))
-        .on('end', () => console.log('Файл [' + fieldName + ']')));
-    boy.on('finish', () => {
-        let result;
-        try {
-            result = privateDecrypt(o.key, o.secret);
-        } catch(e) {
-            result = privateDecrypt(o.key, o.secret);;
-        }
-        res
-        .set(CORS)
-        .send(String(result));
-    });
-  req.pipe(boy);
-})
+  .post('/decypher', (req, res) => {
+    const key = req.files.key.data;
+    const secret = req.files.secret.data;
+
+    let privateKey = key.toString();
+    const decrypted = new NodeRSA(privateKey).decrypt(secret);
+
+    res.send(decrypted);
+  })
 
   .all("/login", (req, res) => res.send("chiziwe"))
 
