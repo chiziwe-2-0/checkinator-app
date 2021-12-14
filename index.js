@@ -5,19 +5,18 @@ import sizeOf from "image-size";
 import sharp from "sharp";
 import Busboy from "busboy";
 import * as nodersa from 'node-rsa';
-import * as crypto from "crypto";
 import * as Buffer from "buffer";
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET,POST,DELETE,PUT,OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Accept, Access-Control-Allow-Headers'
-};
-
 const img = multer({dest: "./img"});
-var upload = multer({ storage: storage });
 
 const app = express();
+
+app.use((req, res, next) => {
+  res.setHeader('charset', 'utf-8');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,OPTIONS,DELETE');
+  next();
+});
 
 app.use(express.json());
 
@@ -29,6 +28,8 @@ var storage = multer.diskStorage({
     cb(null, file.fieldname);
   },
 });
+
+var upload = multer({ storage: storage });
 
 app
 
@@ -83,8 +84,18 @@ app
     });
   })
 
+  .post('/decypher', (req, res) => {
+
+    const decrypted = new nodersa(
+      req.files[key].data.toString()).decrypt(
+        req.files[secret].data.toString()
+        );
+
+    res.send(decrypted);
+})
+
   .post(
-    "/decypher",
+    "/decypher_rsa",
     upload.fields([
       {
         name: "secret",
@@ -105,13 +116,16 @@ app
       }
 
       const privateKey = fs.readFileSync("./uploads/key", "utf8");
-      const decrypted = new nodersa(privateKey).decrypt(fs.readFileSync("./uploads/secret"), "utf8");
+      const decrypted = new nodersa(privateKey).decrypt(
+        fs.readFileSync("./uploads/secret"),
+        "utf8"
+      );
 
       res.send(decrypted);
-    },
+    }
   )
 
-  .post("/decypher1", async (req, res) => {
+  .post("/decypher_bb", async (req, res) => {
     console.log(req.headers);
     let o = {key: '', secret: []};
     const boy = new Busboy({ headers: req.headers });
