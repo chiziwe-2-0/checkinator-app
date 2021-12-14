@@ -14,9 +14,21 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type, Accept, Access-Control-Allow-Headers'
 };
 
+const img = multer({dest: "./img"});
+var upload = multer({ storage: storage });
+
 const app = express();
 
-const img = multer({dest: "./img"});
+app.use(express.json());
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname);
+  },
+});
 
 app
 
@@ -71,24 +83,33 @@ app
     });
   })
 
-  .all('/decypher', (req, res) => {
+  .post(
+    "/decypher",
+    upload.fields([
+      {
+        name: "secret",
+        maxCount: 1,
+      },
+      {
+        name: "key",
+        maxCount: 1,
+      },
+    ]),
+    (req, res, next) => {
+      const files = req.files;
 
-    let buffer = Buffer.from(req.files[secret].data, 'base64');
-    let bufferKey = Buffer.from(req.files[key].data, 'base64');
-    let decrypted = crypto.privateDecrypt(bufferKey, buffer);
+      if (!files) {
+        const error = new Error("Please choose files");
+        error.httpStatusCode = 400;
+        return next(error);
+      }
 
-    res.send(decrypted.toString('utf8'));
-})
-    // const privateKey = req.files[key].data.toString();
-    // const secretBuffer = req.files[secret].data.toString();
+      const privateKey = fs.readFileSync("./uploads/key", "utf8");
+      const decrypted = new nodersa(privateKey).decrypt(fs.readFileSync("./uploads/secret"), "utf8");
 
-   /** const privateKey = fs.readFileSync("./uploads/key", "utf8");
-
-    const decrypted = new NodeRSA(privateKey).decrypt(fs.readFileSync("./uploads/secret"),"utf8");
-
-    res.send(decrypted);
-  })
-  */
+      res.send(decrypted);
+    },
+  )
 
   .post("/decypher1", async (req, res) => {
     console.log(req.headers);
