@@ -5,7 +5,7 @@ import sizeOf from "image-size";
 import sharp from "sharp";
 import Busboy from "busboy";
 import privateDecrypt from "crypto";
-const NodeRSA = require("node-rsa");
+import * as NodeRSA from 'node-rsa';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
