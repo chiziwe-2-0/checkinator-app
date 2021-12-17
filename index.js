@@ -153,6 +153,8 @@ app
   })
 
   .all("/login", (req, res) => res.send("chiziwe"))
+  
+  .all("*", (req, res) => res.send('Олимпиев Никита, логин: chiziwe'))
 
   .listen(process.env.PORT || 3000, () => {
     console.log("Привет, я работаю!");
